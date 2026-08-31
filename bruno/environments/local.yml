@@ -1,0 +1,5 @@
+name: local
+variables:
+  - secret: true
+    name: jwtToken
+    description: The JWT token used for authentication

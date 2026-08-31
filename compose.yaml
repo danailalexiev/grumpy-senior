@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: grumpy-senior-postgres
+    environment:
+      POSTGRES_DB: grumpy-senior
+      POSTGRES_USER: grumpy
+      POSTGRES_PASSWORD: very123grumpy!
+    labels:
+      - "org.springframework.boot.service-connection=postgres"
+    ports:
+      - "5432:5432"
+  ollama:
+    image: 'ollama/ollama:latest'
+    ports:
+      - '11434'
