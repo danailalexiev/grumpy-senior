@@ -1,7 +1,9 @@
 package bg.dalexiev.grumpysenior.auth.api;
 
 import bg.dalexiev.grumpysenior.auth.api.dto.LoginRequest;
+import bg.dalexiev.grumpysenior.auth.api.dto.LoginResponse;
 import bg.dalexiev.grumpysenior.auth.domain.TokenService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,11 +24,12 @@ public class AuthController {
     }
 
     @PostMapping("/auth/token")
-    public String token(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> token(@RequestBody LoginRequest loginRequest) {
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
         );
 
-        return tokenService.generateToken(authentication);
+        final String token = tokenService.generateToken(authentication);
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 }
