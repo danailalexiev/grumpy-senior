@@ -2,19 +2,19 @@ package bg.dalexiev.grumpysenior.chat.api;
 
 import bg.dalexiev.grumpysenior.chat.api.dto.ConversationResponse;
 import bg.dalexiev.grumpysenior.chat.api.dto.MessageResponse;
+import bg.dalexiev.grumpysenior.chat.api.dto.PayloadDto;
+import bg.dalexiev.grumpysenior.chat.api.sse.AnswerStreamObserver;
 import bg.dalexiev.grumpysenior.chat.domain.ChatService;
 import bg.dalexiev.grumpysenior.chat.domain.Conversation;
 import bg.dalexiev.grumpysenior.chat.domain.Message;
 import bg.dalexiev.grumpysenior.util.Either;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.net.URI;
 import java.util.List;
@@ -50,6 +50,20 @@ public class ChatController {
             case Either.Left<ChatService.Error, List<Message>> error -> onError(error);
             case Either.Right<ChatService.Error, List<Message>> success ->
                     ResponseEntity.ok(success.value().stream().map(MessageResponse::from).toList());
+        };
+    }
+
+    @PostMapping("/conversations/{conversationId}/messages")
+    public ResponseEntity<SseEmitter> streamAnswer(@PathVariable Long conversationId, @RequestBody PayloadDto.User payload, @AuthenticationPrincipal Jwt jwt) {
+        final SseEmitter sseEmitter = new SseEmitter();
+
+        final ChatService.StreamObserver answerStreamObserver = AnswerStreamObserver.boundTo(sseEmitter);
+
+        return switch (chatService.generateAnswerAsync(getUserId(jwt), conversationId, payload.toDomain(), answerStreamObserver)) {
+            case Either.Left<ChatService.Error, Void> error -> onError(error);
+            case Either.Right<ChatService.Error, Void> ignored -> ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .body(sseEmitter);
         };
     }
 

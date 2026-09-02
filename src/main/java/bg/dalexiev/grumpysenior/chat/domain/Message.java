@@ -3,7 +3,7 @@ package bg.dalexiev.grumpysenior.chat.domain;
 import bg.dalexiev.grumpysenior.chat.persistence.MessageEntity;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Objects;
 
@@ -26,13 +26,13 @@ public record Message(
         }
     }
 
-    static Message fromEntity(MessageEntity entity, ObjectMapper objectMapper) {
+    static Message fromEntity(MessageEntity entity, JsonMapper jsonMapper) {
         Objects.requireNonNull(entity, "entity must not be null");
-        Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+        Objects.requireNonNull(jsonMapper, "jsonMapper must not be null");
 
         final Payload payload = switch (entity.type()) {
-            case MessageEntity.Type.USER -> objectMapper.readValue(entity.payload(), Payload.User.class);
-            case MessageEntity.Type.BOT -> objectMapper.readValue(entity.payload(), Payload.Bot.class);
+            case MessageEntity.Type.USER -> jsonMapper.readValue(entity.payload().value(), Payload.User.class);
+            case MessageEntity.Type.BOT -> jsonMapper.readValue(entity.payload().value(), Payload.Bot.class);
         };
 
         return new Message(entity.id(), payload);

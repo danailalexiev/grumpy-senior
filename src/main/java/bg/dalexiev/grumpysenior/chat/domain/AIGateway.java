@@ -23,7 +23,7 @@ public interface AIGateway {
 
         void onStateChanged(Map<String, Object> state);
 
-        void onEventSerialized(String eventSerialized);
+        void onEventSerialized(String serializedEvent);
 
         void onRunFinished();
 

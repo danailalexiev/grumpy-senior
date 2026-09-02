@@ -1,7 +1,9 @@
 package bg.dalexiev.grumpysenior.config;
 
-import bg.dalexiev.grumpysenior.chat.persistence.converter.PgObjectToStringConverter;
-import bg.dalexiev.grumpysenior.chat.persistence.converter.StringToPgObjectConverter;
+import bg.dalexiev.grumpysenior.chat.persistence.converter.MessageTypeToStringConverter;
+import bg.dalexiev.grumpysenior.chat.persistence.converter.PgObjectToSerializedPayloadConverter;
+import bg.dalexiev.grumpysenior.chat.persistence.converter.StringToMessageTypeConverter;
+import bg.dalexiev.grumpysenior.chat.persistence.converter.SerializedPayloadToPgObjectConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
@@ -21,7 +23,7 @@ public class PersistenceConfig extends AbstractJdbcConfiguration {
     @SuppressWarnings("NullableProblems")
     @Override
     protected List<?> userConverters() {
-        return List.of(new StringToPgObjectConverter(), new PgObjectToStringConverter());
+        return List.of(new SerializedPayloadToPgObjectConverter(), new PgObjectToSerializedPayloadConverter(), new MessageTypeToStringConverter(), new StringToMessageTypeConverter());
     }
 
     @Bean

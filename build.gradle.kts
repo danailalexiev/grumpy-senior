@@ -26,7 +26,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
+    implementation("io.github.pascalwilbrink.ag-ui.community:spring-ai:1.0.1")
+    implementation("io.github.pascalwilbrink.ag-ui.community:spring:0.0.1")
+
     implementation("org.postgresql:postgresql:42.7.13")
+
+    implementation("com.puppycrawl.tools:checkstyle:14.1.0")
 
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     developmentOnly("org.springframework.ai:spring-ai-spring-boot-docker-compose")

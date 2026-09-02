@@ -1,16 +1,22 @@
 info:
-  name: list-messages-for-conversation
+  name: generate-answer
   type: http
-  seq: 3
+  seq: 4
 
 http:
-  method: GET
+  method: POST
   url: http://localhost:8080/conversations/:conversationId/messages
   params:
     - name: conversationId
-      value: "13"
+      value: "7"
       type: path
-      description: The ID of the conversation
+  body:
+    type: json
+    data: |-
+      {
+        "type": "user",
+        "content": "Can you review this?\n\npublic class Foo {\nimport java.util.*;\npublic void  bar( ){int x=1;}\n}"
+      }
   auth: inherit
 
 settings:

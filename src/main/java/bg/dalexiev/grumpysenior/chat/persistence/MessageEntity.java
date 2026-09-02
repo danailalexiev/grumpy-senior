@@ -11,12 +11,18 @@ public record MessageEntity(
         @Id @Column("id") Long id,
         @Column("conversation_id") Long conversationId,
         @Column("type") Type type,
-        @Column("payload") String payload,
+        @Column("payload") SerializedPayload payload,
         @Column("created_at") Instant createdAt
 ) {
 
-        public enum Type {
-                USER, BOT
-        }
+    public enum Type {
+        USER, BOT
+    }
+
+    public record SerializedPayload(String value) {}
+
+    public static MessageEntity newInstance(long conversationId, Type type, String payload, Instant createdAt) {
+            return new MessageEntity(null, conversationId, type, new SerializedPayload(payload), createdAt);
+    }
 
 }

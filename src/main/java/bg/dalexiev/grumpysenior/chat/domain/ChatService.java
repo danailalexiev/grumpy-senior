@@ -2,13 +2,18 @@ package bg.dalexiev.grumpysenior.chat.domain;
 
 import bg.dalexiev.grumpysenior.chat.persistence.ConversationEntity;
 import bg.dalexiev.grumpysenior.chat.persistence.ConversationRepository;
+import bg.dalexiev.grumpysenior.chat.persistence.MessageEntity;
 import bg.dalexiev.grumpysenior.chat.persistence.MessageRepository;
 import bg.dalexiev.grumpysenior.util.Either;
+import org.jspecify.annotations.NonNull;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class ChatService {
@@ -25,17 +30,33 @@ public class ChatService {
 
     }
 
+    public interface StreamObserver {
+
+        void onNext(String serializedEvent);
+
+        void onComplete();
+
+        void onError(Throwable throwable);
+
+    }
+
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
+
+    private final ThreadPoolTaskExecutor agentRunExecutor;
+
+    private final AIGateway aiGateway;
 
     private final Clock clock;
 
-    public ChatService(ConversationRepository conversationRepository, MessageRepository messageRepository, ObjectMapper objectMapper, Clock clock) {
+    public ChatService(ConversationRepository conversationRepository, MessageRepository messageRepository, JsonMapper jsonMapper, ThreadPoolTaskExecutor agentRunExecutor, AIGateway aiGateway, Clock clock) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
+        this.agentRunExecutor = agentRunExecutor;
+        this.aiGateway = aiGateway;
         this.clock = clock;
     }
 
@@ -55,7 +76,7 @@ public class ChatService {
                 .<Either<Error, List<Message>>>map(conversation -> {
                     if (conversation.userId() == userId) {
                         final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtDesc(conversationId).stream()
-                                .map(entity -> Message.fromEntity(entity, objectMapper))
+                                .map(entity -> Message.fromEntity(entity, jsonMapper))
                                 .toList();
                         return Either.right(messages);
                     } else {
@@ -63,5 +84,54 @@ public class ChatService {
                     }
                 })
                 .orElseGet(() -> Either.left(new Error.InvalidConversation(conversationId)));
+    }
+
+    public Either<Error, Void> generateAnswerAsync(long userId, long conversationId, Message.Payload.User input, StreamObserver streamObserver) {
+        return getConversation(userId, conversationId)
+                .flatMap(conversation -> {
+                    agentRunExecutor.execute(() -> runAgent(conversation, input, streamObserver));
+                    return Either.right(null);
+                });
+    }
+
+    private @NonNull Either<Error, ConversationEntity> getConversation(long userId, long conversationId) {
+        return conversationRepository.findById(conversationId)
+                .<Either<Error, ConversationEntity>>map(conversation -> {
+                    if (Objects.equals(conversation.userId(), userId)) {
+                        return Either.right(conversation);
+                    } else {
+                        return Either.left(new Error.InvalidOwner(userId));
+                    }
+                })
+                .orElseGet(() -> Either.left(new Error.InvalidConversation(conversationId)));
+    }
+
+    private void runAgent(ConversationEntity conversation, Message.Payload.User input, StreamObserver streamObserver) {
+        final MessageEntity message = messageRepository.save(MessageEntity.newInstance(conversation.id(), MessageEntity.Type.USER, jsonMapper.writeValueAsString(input), clock.instant()));
+
+        final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtDesc(conversation.id()).stream()
+                .map(entity -> Message.fromEntity(entity, jsonMapper))
+                .toList();
+
+        final AIGateway.Input agentInput = new AIGateway.Input(
+                Map.of(
+                        "conversationId", conversation.id().toString(),
+                        "messageId", message.id().toString()
+                ),
+                messages
+        );
+
+        final AIGateway.Subscriber subscriber = StreamingSubscriber.create(
+                streamObserver,
+                payload -> saveBotMessage(conversation, payload),
+                _ -> { /* do nothing */ }
+        );
+
+        aiGateway.runAI(agentInput, subscriber);
+    }
+
+    private void saveBotMessage(ConversationEntity conversation, Message.Payload payload) {
+        final MessageEntity answer = MessageEntity.newInstance(conversation.id(), MessageEntity.Type.BOT, jsonMapper.writeValueAsString(payload), clock.instant());
+        messageRepository.save(answer);
     }
 }
