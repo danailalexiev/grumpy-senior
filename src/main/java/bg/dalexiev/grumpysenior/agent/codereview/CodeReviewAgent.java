@@ -1,10 +1,10 @@
-package bg.dalexiev.grumpysenior.agent;
+package bg.dalexiev.grumpysenior.agent.codereview;
 
-import bg.dalexiev.grumpysenior.agent.agui.AgUiAgentSubscriber;
-import bg.dalexiev.grumpysenior.agent.agui.ChatMapper;
-import bg.dalexiev.grumpysenior.agent.agui.SpringAiMapper;
-import bg.dalexiev.grumpysenior.agent.tool.LintingTools;
-import bg.dalexiev.grumpysenior.chat.domain.AIGateway;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.AgUiAgentSubscriber;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.ChatMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.SpringAiMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.tool.LintingTools;
+import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
 import bg.dalexiev.grumpysenior.chat.domain.Message;
 import com.agui.core.agent.AgentSubscriber;
 import com.agui.core.agent.RunAgentInput;

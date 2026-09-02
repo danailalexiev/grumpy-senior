@@ -1,6 +1,6 @@
-package bg.dalexiev.grumpysenior.agent.agui;
+package bg.dalexiev.grumpysenior.agent.codereview.agui;
 
-import bg.dalexiev.grumpysenior.chat.domain.AIGateway;
+import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
 import bg.dalexiev.grumpysenior.chat.domain.Message;
 import com.agui.core.agent.RunAgentParameters;
 import com.agui.core.message.AssistantMessage;

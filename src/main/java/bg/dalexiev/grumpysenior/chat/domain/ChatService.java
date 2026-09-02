@@ -1,12 +1,14 @@
 package bg.dalexiev.grumpysenior.chat.domain;
 
+import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
+import bg.dalexiev.grumpysenior.chat.domain.event.FirstTurnCompletedEvent;
 import bg.dalexiev.grumpysenior.chat.persistence.ConversationEntity;
 import bg.dalexiev.grumpysenior.chat.persistence.ConversationRepository;
 import bg.dalexiev.grumpysenior.chat.persistence.MessageEntity;
 import bg.dalexiev.grumpysenior.chat.persistence.MessageRepository;
 import bg.dalexiev.grumpysenior.util.Either;
 import org.jspecify.annotations.NonNull;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -45,17 +47,17 @@ public class ChatService {
 
     private final JsonMapper jsonMapper;
 
-    private final ThreadPoolTaskExecutor agentRunExecutor;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final AIGateway aiGateway;
 
     private final Clock clock;
 
-    public ChatService(ConversationRepository conversationRepository, MessageRepository messageRepository, JsonMapper jsonMapper, ThreadPoolTaskExecutor agentRunExecutor, AIGateway aiGateway, Clock clock) {
+    public ChatService(ConversationRepository conversationRepository, MessageRepository messageRepository, JsonMapper jsonMapper, ApplicationEventPublisher eventPublisher, AIGateway aiGateway, Clock clock) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.jsonMapper = jsonMapper;
-        this.agentRunExecutor = agentRunExecutor;
+        this.eventPublisher = eventPublisher;
         this.aiGateway = aiGateway;
         this.clock = clock;
     }
@@ -89,7 +91,7 @@ public class ChatService {
     public Either<Error, Void> generateAnswerAsync(long userId, long conversationId, Message.Payload.User input, StreamObserver streamObserver) {
         return getConversation(userId, conversationId)
                 .flatMap(conversation -> {
-                    agentRunExecutor.execute(() -> runAgent(conversation, input, streamObserver));
+                    runAgent(conversation, input, streamObserver);
                     return Either.right(null);
                 });
     }
@@ -123,7 +125,10 @@ public class ChatService {
 
         final AIGateway.Subscriber subscriber = StreamingSubscriber.create(
                 streamObserver,
-                payload -> saveBotMessage(conversation, payload),
+                payload -> {
+                    saveBotMessage(conversation, payload);
+                    publishFirstTurnCompletedEventIfNeeded(conversation, messages.size(), input, payload);
+                },
                 _ -> { /* do nothing */ }
         );
 
@@ -133,5 +138,12 @@ public class ChatService {
     private void saveBotMessage(ConversationEntity conversation, Message.Payload payload) {
         final MessageEntity answer = MessageEntity.newInstance(conversation.id(), MessageEntity.Type.BOT, jsonMapper.writeValueAsString(payload), clock.instant());
         messageRepository.save(answer);
+    }
+
+    private void publishFirstTurnCompletedEventIfNeeded(ConversationEntity conversation, int messageCount, Message.Payload.User userPrompt, Message.Payload.Bot botAnswer) {
+        if ((messageCount == 1) && conversation.title().equals(ConversationEntity.DEFAULT_TITLE)) {
+            final FirstTurnCompletedEvent event = new FirstTurnCompletedEvent(conversation.id(), userPrompt.content(), botAnswer.content());
+            eventPublisher.publishEvent(event);
+        }
     }
 }

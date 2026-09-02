@@ -9,13 +9,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean
-    public ThreadPoolTaskExecutor agentRunExecutor() {
+    @Bean(name = "titleGenerationExecutor")
+    public ThreadPoolTaskExecutor titleGenerationExecutor() {
         final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(20);   // Always keep 20 threads ready
-        executor.setMaxPoolSize(100);  // Scale up to 100 under load
-        executor.setQueueCapacity(500); // Wait in line if all 100 are busy
-        executor.setThreadNamePrefix("agent-worker-");
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("title-generation-worker-");
         executor.initialize();
         return executor;
     }

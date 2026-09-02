@@ -1,4 +1,4 @@
-package bg.dalexiev.grumpysenior.agent.tool;
+package bg.dalexiev.grumpysenior.agent.codereview.tool;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;

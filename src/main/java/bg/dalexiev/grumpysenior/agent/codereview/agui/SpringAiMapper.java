@@ -1,4 +1,4 @@
-package bg.dalexiev.grumpysenior.agent.agui;
+package bg.dalexiev.grumpysenior.agent.codereview.agui;
 
 import com.agui.core.message.*;
 import org.jspecify.annotations.Nullable;

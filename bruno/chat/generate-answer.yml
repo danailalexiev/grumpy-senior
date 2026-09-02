@@ -8,7 +8,7 @@ http:
   url: http://localhost:8080/conversations/:conversationId/messages
   params:
     - name: conversationId
-      value: "7"
+      value: "11"
       type: path
   body:
     type: json

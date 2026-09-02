@@ -1,4 +1,6 @@
-package bg.dalexiev.grumpysenior.chat.domain;
+package bg.dalexiev.grumpysenior.chat.domain.ai;
+
+import bg.dalexiev.grumpysenior.chat.domain.Message;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,7 @@ public interface AIGateway {
 
     interface Subscriber {
 
-        void onMessagePayloadReady(Message.Payload payload);
+        void onMessagePayloadReady(Message.Payload.Bot payload);
 
         void onStateChanged(Map<String, Object> state);
 
