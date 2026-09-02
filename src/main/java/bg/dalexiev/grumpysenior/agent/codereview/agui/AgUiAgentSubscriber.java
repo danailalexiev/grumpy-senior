@@ -1,6 +1,6 @@
-package bg.dalexiev.grumpysenior.agent.agui;
+package bg.dalexiev.grumpysenior.agent.codereview.agui;
 
-import bg.dalexiev.grumpysenior.chat.domain.AIGateway;
+import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
 import bg.dalexiev.grumpysenior.chat.domain.Message;
 import com.agui.core.agent.AgentSubscriber;
 import com.agui.core.agent.AgentSubscriberParams;
@@ -52,7 +52,7 @@ public class AgUiAgentSubscriber implements AgentSubscriber {
 
     @Override
     public void onCustomEvent(CustomEvent event) {
-        final Message.Payload payload = jsonMapper.treeToValue((JsonNode) event.getRawEvent(), Message.Payload.class);
+        final Message.Payload.Bot payload = jsonMapper.treeToValue((JsonNode) event.getRawEvent(), Message.Payload.Bot.class);
         subscriber.onMessagePayloadReady(payload);
     }
 }

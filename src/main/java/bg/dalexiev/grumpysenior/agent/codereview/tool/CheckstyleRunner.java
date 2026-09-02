@@ -1,4 +1,4 @@
-package bg.dalexiev.grumpysenior.agent.tool;
+package bg.dalexiev.grumpysenior.agent.codereview.tool;
 
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.ConfigurationLoader;
