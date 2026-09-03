@@ -129,9 +129,9 @@ public class CodeReviewAgent extends LocalAgent implements AIGateway {
         emitEvent(stepFinishedEvent("processing"), subscriber);
     }
 
-    private @NonNull List<org.springframework.ai.chat.messages.Message> getPreviousMessages(BaseMessage message) {
+    private @NonNull List<org.springframework.ai.chat.messages.Message> getPreviousMessages(BaseMessage lastUserMessage) {
         return getMessages().stream()
-                .filter(current -> current.getId().equals(message.getId()))
+                .filter(current -> !current.getId().equals(lastUserMessage.getId()))
                 .map(springAiMapper::mapToSpringAiMessage)
                 .filter(Objects::nonNull)
                 .toList();
