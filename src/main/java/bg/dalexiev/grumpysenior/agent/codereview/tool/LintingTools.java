@@ -1,5 +1,6 @@
 package bg.dalexiev.grumpysenior.agent.codereview.tool;
 
+import org.slf4j.Logger;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.security.core.parameters.P;
@@ -11,6 +12,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class LintingTools {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LintingTools.class);
 
     private final CheckstyleRunner checkstyleRunner;
 
@@ -24,6 +27,8 @@ public class LintingTools {
 
     @Tool(name = "lintJavaCode", description = "Runs Checkstyle on the given Java source code and returns style violations")
     public String lintJavaCode(@ToolParam(description = "Full Java source code to check") String javaCode) throws IOException {
+        logger.info("[TOOL CALL] lintJavaCode invoked, code length={}", javaCode.length());
+
         Path tempFile = Files.createTempFile("submitted-", ".java");
         try {
             Files.writeString(tempFile, javaCode);

@@ -1,8 +1,8 @@
 package bg.dalexiev.grumpysenior.agent.codereview;
 
 import bg.dalexiev.grumpysenior.agent.codereview.agui.AgUiAgentSubscriber;
-import bg.dalexiev.grumpysenior.agent.codereview.agui.ChatMapper;
-import bg.dalexiev.grumpysenior.agent.codereview.agui.SpringAiMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.InputMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.AgUiMessageMapper;
 import bg.dalexiev.grumpysenior.agent.codereview.tool.LintingTools;
 import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
 import bg.dalexiev.grumpysenior.chat.domain.Message;
@@ -30,8 +30,8 @@ public class CodeReviewAgent extends LocalAgent implements AIGateway {
 
     private final ChatClient chatClient;
 
-    private final ChatMapper chatMapper;
-    private final SpringAiMapper springAiMapper;
+    private final InputMapper inputMapper;
+    private final AgUiMessageMapper agUiMessageMapper;
     private final JsonMapper jsonMapper;
 
     private final LintingTools lintingTools;
@@ -77,18 +77,18 @@ public class CodeReviewAgent extends LocalAgent implements AIGateway {
             - Line 14: `Name` should be `name` — capital letters are for classes, not fields.
             """;
 
-    public CodeReviewAgent(ChatClient chatClient, ChatMapper chatMapper, SpringAiMapper springAiMapper, JsonMapper jsonMapper, LintingTools lintingTools) throws AGUIException {
+    public CodeReviewAgent(ChatClient chatClient, InputMapper inputMapper, AgUiMessageMapper agUiMessageMapper, JsonMapper jsonMapper, LintingTools lintingTools) throws AGUIException {
         super("code-review-agent", new State(), new LinkedList<>());
         this.chatClient = chatClient;
-        this.chatMapper = chatMapper;
-        this.springAiMapper = springAiMapper;
+        this.inputMapper = inputMapper;
+        this.agUiMessageMapper = agUiMessageMapper;
         this.jsonMapper = jsonMapper;
         this.lintingTools = lintingTools;
     }
 
     @Override
     public void runAI(Input input, Subscriber subscriber) {
-        final RunAgentParameters parameters = chatMapper.mapToRunAgentParameters(input);
+        final RunAgentParameters parameters = inputMapper.mapToRunAgentParameters(input);
         final AgentSubscriber agentSubscriber = AgUiAgentSubscriber.from(subscriber, jsonMapper);
         runAgent(parameters, agentSubscriber);
     }
@@ -132,7 +132,7 @@ public class CodeReviewAgent extends LocalAgent implements AIGateway {
     private @NonNull List<org.springframework.ai.chat.messages.Message> getPreviousMessages(BaseMessage lastUserMessage) {
         return getMessages().stream()
                 .filter(current -> !current.getId().equals(lastUserMessage.getId()))
-                .map(springAiMapper::mapToSpringAiMessage)
+                .map(agUiMessageMapper::mapToSpringAiMessage)
                 .filter(Objects::nonNull)
                 .toList();
     }

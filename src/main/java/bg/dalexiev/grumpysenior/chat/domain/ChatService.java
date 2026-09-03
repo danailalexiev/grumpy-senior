@@ -109,7 +109,11 @@ public class ChatService {
     }
 
     private void runAgent(ConversationEntity conversation, Message.Payload.User input, StreamObserver streamObserver) {
-        final MessageEntity message = messageRepository.save(MessageEntity.newInstance(conversation.id(), MessageEntity.Type.USER, jsonMapper.writeValueAsString(input), clock.instant()));
+        final MessageEntity.Type type = switch (input) {
+            case Message.Payload.User.CodeSubmission codeSubmission -> MessageEntity.Type.CODE_SUBMISSION;
+            case Message.Payload.User.Prompt prompt -> MessageEntity.Type.PROMPT;
+        };
+        final MessageEntity message = messageRepository.save(MessageEntity.newInstance(conversation.id(), type, jsonMapper.writeValueAsString(input), clock.instant()));
 
         final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtAsc(conversation.id()).stream()
                 .map(entity -> Message.fromEntity(entity, jsonMapper))
@@ -142,7 +146,7 @@ public class ChatService {
 
     private void publishFirstTurnCompletedEventIfNeeded(ConversationEntity conversation, int messageCount, Message.Payload.User userPrompt, Message.Payload.Bot botAnswer) {
         if ((messageCount == 1) && conversation.title().equals(ConversationEntity.DEFAULT_TITLE)) {
-            final FirstTurnCompletedEvent event = new FirstTurnCompletedEvent(conversation.id(), userPrompt.content(), botAnswer.content());
+            final FirstTurnCompletedEvent event = new FirstTurnCompletedEvent(conversation.id(), userPrompt, botAnswer);
             eventPublisher.publishEvent(event);
         }
     }

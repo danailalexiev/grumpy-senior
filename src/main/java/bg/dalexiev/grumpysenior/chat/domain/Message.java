@@ -14,12 +14,19 @@ public record Message(
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = Payload.User.class, name = "user"),
+            @JsonSubTypes.Type(value = Payload.User.CodeSubmission.class, name = "code-submission"),
+            @JsonSubTypes.Type(value = Payload.User.Prompt.class, name = "prompt"),
             @JsonSubTypes.Type(value = Payload.Bot.class, name = "bot")
     })
     public sealed interface Payload {
 
-        record User(String content) implements Payload {
+        sealed interface User extends Payload {
+
+            record CodeSubmission(String message, String code) implements User {
+            }
+
+            record Prompt(String message) implements User {
+            }
         }
 
         record Bot(String content) implements Payload {
@@ -31,7 +38,8 @@ public record Message(
         Objects.requireNonNull(jsonMapper, "jsonMapper must not be null");
 
         final Payload payload = switch (entity.type()) {
-            case MessageEntity.Type.USER -> jsonMapper.readValue(entity.payload().value(), Payload.User.class);
+            case MessageEntity.Type.CODE_SUBMISSION -> jsonMapper.readValue(entity.payload().value(), Payload.User.CodeSubmission.class);
+            case MessageEntity.Type.PROMPT -> jsonMapper.readValue(entity.payload().value(), Payload.User.Prompt.class);
             case MessageEntity.Type.BOT -> jsonMapper.readValue(entity.payload().value(), Payload.Bot.class);
         };
 

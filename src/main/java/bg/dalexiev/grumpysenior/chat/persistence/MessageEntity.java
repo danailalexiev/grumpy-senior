@@ -16,7 +16,7 @@ public record MessageEntity(
 ) {
 
     public enum Type {
-        USER, BOT
+        CODE_SUBMISSION, PROMPT, BOT
     }
 
     public record SerializedPayload(String value) {}

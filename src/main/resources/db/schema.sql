@@ -15,7 +15,7 @@ CREATE INDEX ON conversations (user_id);
 CREATE TABLE IF NOT EXISTS messages (
     id bigserial PRIMARY KEY,
     conversation_id bigint NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
-    type varchar(20) NOT NULL CHECK (type in ('USER', 'BOT')),
+    type varchar(20) NOT NULL CHECK (type in ('CODE_SUBMISSION', 'PROMPT', 'BOT')),
     payload jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL
 );

@@ -1,9 +1,10 @@
 package bg.dalexiev.grumpysenior.config;
 
 import bg.dalexiev.grumpysenior.agent.codereview.CodeReviewAgent;
-import bg.dalexiev.grumpysenior.agent.codereview.agui.ChatMapper;
-import bg.dalexiev.grumpysenior.agent.codereview.agui.SpringAiMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.InputMapper;
+import bg.dalexiev.grumpysenior.agent.codereview.agui.AgUiMessageMapper;
 import bg.dalexiev.grumpysenior.agent.codereview.tool.LintingTools;
+import bg.dalexiev.grumpysenior.agent.mapper.MessagePayloadMapper;
 import bg.dalexiev.grumpysenior.agent.titlegeneration.TitleGenerationAgent;
 import bg.dalexiev.grumpysenior.chat.domain.ai.AIGateway;
 import bg.dalexiev.grumpysenior.chat.domain.ai.TitleGenerator;
@@ -28,11 +29,11 @@ public class AgentConfig {
 
     @Bean
     public AIGateway aiGateway(ChatClient chatClient, JsonMapper jsonMapper) throws AGUIException {
-        return new CodeReviewAgent(chatClient, ChatMapper.newInstance(), SpringAiMapper.newInstance(), jsonMapper, LintingTools.newInstance());
+        return new CodeReviewAgent(chatClient, InputMapper.newInstance(), AgUiMessageMapper.newInstance(), jsonMapper, LintingTools.newInstance());
     }
 
     @Bean
     public TitleGenerator titleGenerator(ChatClient chatClient) {
-        return new TitleGenerationAgent(chatClient);
+        return new TitleGenerationAgent(chatClient, MessagePayloadMapper.newInstance());
     }
 }

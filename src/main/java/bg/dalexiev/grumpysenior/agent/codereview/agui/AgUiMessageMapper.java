@@ -7,13 +7,13 @@ import org.springframework.ai.chat.messages.ToolResponseMessage;
 
 import java.util.List;
 
-public class SpringAiMapper {
+public class AgUiMessageMapper {
 
-    private SpringAiMapper() {
+    private AgUiMessageMapper() {
     }
 
-    public static SpringAiMapper newInstance() {
-        return new SpringAiMapper();
+    public static AgUiMessageMapper newInstance() {
+        return new AgUiMessageMapper();
     }
 
     public @Nullable Message mapToSpringAiMessage(BaseMessage message) {

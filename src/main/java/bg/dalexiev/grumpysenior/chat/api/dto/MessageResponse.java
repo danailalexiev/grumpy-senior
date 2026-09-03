@@ -11,7 +11,8 @@ public record MessageResponse(
         return new MessageResponse(
                 message.id(),
                 switch (message.payload()) {
-                    case Message.Payload.User userPayload -> new PayloadDto.User(userPayload.content());
+                    case Message.Payload.User.CodeSubmission codeSubmission -> new PayloadDto.User.CodeSubmission(codeSubmission.message(), codeSubmission.code());
+                    case Message.Payload.User.Prompt prompt -> new PayloadDto.User.Prompt(prompt.message());
                     case Message.Payload.Bot botPayload -> new PayloadDto.Bot(botPayload.content());
                 }
         );
