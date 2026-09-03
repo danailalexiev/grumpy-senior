@@ -8,6 +8,6 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends ListCrudRepository<MessageEntity, Long> {
 
-    List<MessageEntity> findAllByConversationIdOrderByCreatedAtDesc(long conversationId);
+    List<MessageEntity> findAllByConversationIdOrderByCreatedAtAsc(long conversationId);
 
 }

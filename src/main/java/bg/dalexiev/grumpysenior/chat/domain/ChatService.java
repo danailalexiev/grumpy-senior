@@ -75,7 +75,7 @@ public class ChatService {
         return conversationRepository.findById(conversationId)
                 .<Either<Error, List<Message>>>map(conversation -> {
                     if (conversation.userId() == userId) {
-                        final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtDesc(conversationId).stream()
+                        final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtAsc(conversationId).stream()
                                 .map(entity -> Message.fromEntity(entity, jsonMapper))
                                 .toList();
                         return Either.right(messages);
@@ -109,7 +109,7 @@ public class ChatService {
     private void runAgent(ConversationEntity conversation, Message.Payload.User input, StreamObserver streamObserver) {
         final MessageEntity message = messageRepository.save(MessageEntity.newInstance(conversation.id(), MessageEntity.Type.USER, jsonMapper.writeValueAsString(input), clock.instant()));
 
-        final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtDesc(conversation.id()).stream()
+        final List<Message> messages = messageRepository.findAllByConversationIdOrderByCreatedAtAsc(conversation.id()).stream()
                 .map(entity -> Message.fromEntity(entity, jsonMapper))
                 .toList();
 

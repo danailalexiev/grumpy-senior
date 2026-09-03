@@ -24,7 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.ai:spring-ai-starter-model-ollama")
+    implementation("org.springframework.ai:spring-ai-starter-model-google-genai")
 
     implementation("io.github.pascalwilbrink.ag-ui.community:spring-ai:1.0.1")
     implementation("io.github.pascalwilbrink.ag-ui.community:spring:0.0.1")

@@ -36,6 +36,6 @@ The demo covers the following topics:
 ## Running Locally
 1. Clone the repository
 2. Run the docker services using `docker-compose up`
-3. Pull the `llama3.1:8b` model from `ollama` container
+3. Set the `GEMINI_AI_KEY` environment variable (or switch to a different AI provider)
 4. Start the Spring app
 5. Use the [Bruno](https://www.usebruno.com/) collection in [this folder](bruno) to test the endpoints. Use admin / secret123 to log in.
