@@ -32,6 +32,7 @@ The demo covers the following topics:
 - `main` - The starting point for an AI integration. No AI agent implementation, no AG-UI, only auth, user and chat management.
 - `feat/plugging-in-ai` - AI agent implementation with AG-UI, tools and a streaming API endpoint
 - `feat/generate-chat-title` - AI-powered chat title generation using Application Events
+- `feat/structured-input` - Migrating to using a structured input format for user prompts
 
 ## Running Locally
 1. Clone the repository
